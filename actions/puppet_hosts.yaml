@@ -1,0 +1,35 @@
+---
+
+name: puppet.hosts
+description: "Returns a list of hosts in a specific Puppet environment"
+
+runner_type: python-script
+entry_point: puppet_hosts.py
+
+parameters:
+  url:
+    description: "Foreman Url. https://yourdomain.tld"
+    type: string
+
+  username:
+    type: string
+
+  password:
+    type: string
+
+  environment:
+    type: string
+    default: production
+
+  verify_ssl:
+    type: boolean
+    default: False
+
+  only_active:
+    type: boolean
+    default: True
+
+  extended:
+    type: boolean
+    default: False
+    description: "Returns the whole json object, instead of a list of hostnames"

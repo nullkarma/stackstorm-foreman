@@ -1,0 +1,35 @@
+---
+
+name: puppet.agent.status
+enabled: true
+description: "List Hosts filtered by Puppet Agent Status"
+
+runner_type: python-script
+entry_point: puppet_agent_status.py
+
+parameters:
+  url:
+    type: string
+  username:
+    type: string
+  password:
+    type: string
+  verify_ssl:
+    type: boolean
+    default: False
+  environment:
+    type: string
+    default: production
+  hosts:
+    type: array
+    required: False
+  only_active:
+    type: boolean
+    default: True
+  status:
+    type: string
+    default: 'error'
+    enum:
+      - 'out of sync'
+      - 'no changes'
+      - 'error'
