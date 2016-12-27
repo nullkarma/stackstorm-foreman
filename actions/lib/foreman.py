@@ -26,7 +26,7 @@ class ForemanAPI(Action):
             host_status = self._query("hosts/{0}/status/global".format(hostname), verify_ssl=self.verify_ssl).get(
                 'status')
             if host_status == 0:
-                yield hostname
+                yield host
 
     def _query(self, endpoint, verify_ssl):
         api_url = "{url}/{api_ext}/{endpoint}".format(url=self.url, api_ext='api', endpoint=endpoint)
