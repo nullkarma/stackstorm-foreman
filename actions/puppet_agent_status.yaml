@@ -26,6 +26,10 @@ parameters:
   only_active:
     type: boolean
     default: True
+  extended:
+    type: boolean
+    default: False
+    description: "Show the raw json object"
   status:
     type: string
     default: 'error'
