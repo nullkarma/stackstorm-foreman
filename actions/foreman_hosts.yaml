@@ -1,6 +1,6 @@
 ---
 
-name: foreman.hosts
+name: hosts
 description: "List Hosts managed by Foreman"
 
 runner_type: python-script
