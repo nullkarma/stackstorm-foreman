@@ -2,7 +2,7 @@
 
 name: puppet.agent.status
 enabled: true
-description: "List Hosts filtered by Puppet Agent Status"
+description: "List puppet hosts by agent status"
 
 runner_type: python-script
 entry_point: puppet_agent_status.py

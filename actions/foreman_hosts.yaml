@@ -1,34 +1,25 @@
 ---
 
-name: puppet.hosts
-description: "List puppet hosts by environment"
+name: foreman.hosts
+description: "List Hosts managed by Foreman"
 
 runner_type: python-script
-entry_point: puppet_hosts.py
+entry_point: foreman_hosts.py
 
 parameters:
   url:
     description: "Foreman Url. https://yourdomain.tld"
     type: string
-
   username:
     type: string
-
   password:
     type: string
-
-  environment:
-    type: string
-    default: production
-
   verify_ssl:
     type: boolean
     default: False
-
   only_active:
     type: boolean
     default: True
-
   extended:
     type: boolean
     default: False
