@@ -5,6 +5,6 @@ ref: foreman
 description: Interact with Foreman API v2
 keywords:
     - foreman
-version: 0.1.0
+version: 0.2.0
 author: Daniel Chamot
 email: daniel@nullkarma.com
