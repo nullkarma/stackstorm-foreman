@@ -6,6 +6,27 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
+class RequestsMethod(object):
+    @staticmethod
+    def method(method, url, auth=None, verify_ssl=False, headers=None, params=None, json=None):
+        methods = {'get': requests.get,
+                   'post': requests.post,
+                   'put': requests.put}
+
+        if not params:
+            params = dict()
+
+        if not json:
+            json = dict()
+
+        requests_method = methods.get(method)
+        response = requests_method(url, auth=auth, headers=headers, params=params, json=json, verify=verify_ssl)
+        if response.status_code:
+            return response.json()
+        else:
+            return response.text
+
+
 class ForemanAPI(Action):
     def __init__(self, config):
         super(ForemanAPI, self).__init__(config=config)
@@ -16,54 +37,65 @@ class ForemanAPI(Action):
 
         self._headers = {"Accept": "version=2,application/json"}
 
-    def active_hosts(self, hosts):
+    def running_hosts(self, hosts):
         for host in hosts:
             try:
                 hostname = host.get('name')
             except AttributeError:
                 hostname = host
 
-            host_status = self._query("hosts/{0}/status/global".format(hostname), verify_ssl=self.verify_ssl).get(
-                'status')
-            if host_status == 0:
+            host_status = self.get("hosts/{0}/vm_compute_attributes".format(hostname),
+                                   verify_ssl=self.verify_ssl).get('state')
+            if host_status.lower() not in ['shutoff']:
                 yield host
 
-    def _query(self, endpoint, verify_ssl):
+    def _get(self, endpoint, params=None, *args, **kwargs):
         api_url = "{url}/{api_ext}/{endpoint}".format(url=self.url, api_ext='api', endpoint=endpoint)
-        response = requests.get(api_url,
-                                auth=(self.username, self.password),
-                                headers=self._headers,
-                                verify=verify_ssl or self.verify_ssl,
-                                params={"per_page": "100"})
+        return RequestsMethod.method('get',
+                                     url=api_url,
+                                     auth=(self.username, self.password),
+                                     verify_ssl=self.verify_ssl,
+                                     headers=self._headers,
+                                     params=params)
 
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return response.text
+    def _post(self, endpoint, params=None, payload=None, *args, **kwargs):
+        api_url = "{url}/{api_ext}/{endpoint}".format(url=self.url, api_ext='api', endpoint=endpoint)
+        return RequestsMethod.method('post',
+                                     url=api_url,
+                                     auth=(self.username, self.password),
+                                     verify_ssl=self.verify_ssl,
+                                     headers=self._headers,
+                                     params=params,
+                                     json=payload)
 
-    def query(self, *args, **kwargs):
-        return self._query(*args, **kwargs)
+    def _put(self, endpoint, params=None, payload=None, *args, **kwargs):
+        api_url = "{url}/{api_ext}/{endpoint}".format(url=self.url, api_ext='api', endpoint=endpoint)
+        return RequestsMethod.method('put',
+                                     url=api_url,
+                                     auth=(self.username, self.password),
+                                     verify_ssl=self.verify_ssl,
+                                     headers=self._headers,
+                                     params=params,
+                                     json=payload)
+
+    def get(self, *args, **kwargs):
+        return self._get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        return self._post(*args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        return self._put(*args, **kwargs)
 
 
-class ForemanPuppet(ForemanAPI):
+class ForemanHosts(ForemanAPI):
     def __init__(self, config):
-        super(ForemanPuppet, self).__init__(config=config)
+        super(ForemanHosts, self).__init__(config=config)
 
-    def hosts(self, environment, extended, only_active):
-        hosts_raw = self._query("environments/{0}/hosts".format(environment), verify_ssl=self.verify_ssl).get('results')
-        if only_active:
-
-            # hosts = [host for host in hosts_raw if host['global_status'] == 0]
-
-            # BUG: Global Status is always set to 0, even if a system is shutdown.
-            # 'hosts/:id/status/global' tells the truth, or like in this quick fix
-            # global_status_label does, too. But it might not be as acurate as 'status/global'
-
-            # hosts = [host for host in hosts_raw if host['global_status_label'] == 'OK']
-
-            # That's why a 2nd query fetches the true host status
-
-            hosts = [host for host in self.active_hosts(hosts_raw)]
+    def hosts(self, endpoint, extended, running, params):
+        hosts_raw = self.get(endpoint, params=params, verify_ssl=self.verify_ssl).get('results')
+        if running:
+            hosts = [host for host in self.running_hosts(hosts_raw)]
         else:
             hosts = hosts_raw
 
@@ -71,6 +103,6 @@ class ForemanPuppet(ForemanAPI):
             try:
                 return [host.get('name') for host in hosts]
             except AttributeError:
-                pass
+                return [host for host in hosts]
 
         return hosts
