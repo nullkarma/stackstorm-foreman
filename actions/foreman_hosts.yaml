@@ -7,20 +7,14 @@ runner_type: python-script
 entry_point: foreman_hosts.py
 
 parameters:
-  url:
-    description: "Foreman Url. https://yourdomain.tld"
-    type: string
-  username:
-    type: string
-  password:
-    type: string
-  verify_ssl:
-    type: boolean
-    default: False
-  only_active:
+  running:
     type: boolean
     default: True
+    description: "Show only running hosts"
   extended:
     type: boolean
     default: False
     description: "Returns the whole json object, instead of a list of hostnames"
+  query_filter:
+      type: object
+      description: "See /hosts Foreman API Documentation"
