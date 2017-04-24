@@ -3,4 +3,3 @@
 .gitignore
 test/
 ci/
-.gitlab-ci.yml
