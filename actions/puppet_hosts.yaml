@@ -20,4 +20,4 @@ parameters:
     description: "Returns the whole json object, instead of a list of hostnames"
   query_filter:
       type: object
-      description: "See /hosts Foreman API Documentation"
+      description: "Foreman Query Syntax -- environment = production and domain = domain.tld"
